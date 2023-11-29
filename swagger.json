@@ -1,0 +1,164 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Chat API",
+      "version": "1.0.0",
+      "description": "An API for wa interactions"
+    },
+    "servers": [
+      {
+        "url": "https://us-bank-wa-app.19mn75vr6dgu.private.us-east.codeengine.appdomain.cloud"
+      }
+    ],
+    "paths": {
+      "/assign_id": {
+        "post": {
+          "summary": "Assign ID",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "type": "string",
+                      "description": "wa user id"
+                    }
+                  },
+                  "required": [
+                    "user_id"
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "response": {
+                        "type": "string"
+                        }    
+                      }
+                    }
+                  }
+                }
+              },
+            "400": {
+              "description": "Bad request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/get_user_data": {
+        "post": {
+          "summary": "Get User Data",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user_id": {
+                      "type": "string",
+                      "description": "wa user id"
+                    }
+                  },
+                  "required": [
+                    "user_id"
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "NAME": {
+                        "type": "string"
+                        },
+                      "AGE": {
+                        "type": "string"
+                          },
+                      "GENDER": {
+                        "type": "string"
+                          },
+                      "MARITAL": {
+                        "type": "string"
+                          },
+                      "EDUCATION": {
+                        "type": "string"
+                          },     
+                      "CURRENT_INCOME": {
+                        "type": "string"
+                            },   
+                      "TOTAL_401K_SAVINGS": {
+                        "type": "string"
+                             },
+                      "TOTAL_HSA_SAVINGS": {
+                        "type": "string"
+                          },
+                      "TOTAL_DEBT": {
+                        "type": "string"
+                          },
+                      "TOTAL_NET_WORTH": {
+                        "type": "string"
+                          },
+                      "STATE": {
+                        "type": "string"
+                          },     
+                      "USER_ID": {
+                        "type": "string"
+                            },   
+                      "PERSONADESC": {
+                        "type": "string"
+                            }           
+                      }
+                    }
+                  }
+                }
+              },
+            "400": {
+              "description": "Bad request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  

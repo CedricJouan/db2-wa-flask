@@ -1,0 +1,5 @@
+flask
+psutil
+pandas
+python-dotenv
+ibm_db
