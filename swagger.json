@@ -11,6 +11,70 @@
       }
     ],
     "paths": {
+      "/send_email": {
+        "post": {
+          "summary": "Send an Email",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "email_message": {
+                      "type": "string",
+                      "description": "Email text"
+                    },
+                    "email_subject": {
+                      "type": "string",
+                      "description": "Suject of the email"
+                    },
+                    "email_to": {
+                      "type": "string",
+                      "description": "Address of the receiver"
+                    }
+                  },
+                  "required": [
+                    "email_message", "email_subject", "email_to"
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "response": {
+                        "type": "string"
+                        }    
+                      }
+                    }
+                  }
+                }
+              },
+            "400": {
+              "description": "Bad request",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "/assign_id": {
         "post": {
           "summary": "Assign ID",

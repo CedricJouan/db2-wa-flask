@@ -3,3 +3,4 @@ psutil
 pandas
 python-dotenv
 ibm_db
+requests

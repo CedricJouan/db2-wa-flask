@@ -3,7 +3,7 @@ import os
 import ibm_db_dbi as dbi
 import pandas as pd
 from dotenv import load_dotenv
-import json, logging, traceback, random
+import json, logging, traceback, random, requests
 
 
 
@@ -17,8 +17,10 @@ DB2___PERSONAS_DSN = 'DATABASE={database};HOSTNAME={hostname};PORT={port};PROTOC
     hostname= os.environ.get("DB2_HOST",""),
     port=os.environ.get("DB2_PORT",""),
     username=os.environ.get("DB2_USERNAME",""),
-    password=os.environ.get("DB2_PASTWORD","")
+    password=os.environ.get("DB2_PASSWORD","")
 )
+
+MAILGUN_API_KEY = os.environ.get("MAILGUN_API_KEY","")
 
 ui2name_index = './user_index.json'
 
@@ -76,6 +78,23 @@ def update_index(wa_user_id):
     else :
         logging.info(f"failed to retrieve ids in database, db_ids:", str(db_ids))
         return None
+
+@app.route('/send_email', methods=['POST']) 
+def send_email(): 
+    logging.info("send_email") 
+    data = request.get_json(force=True) 
+    email_message = data['email_message'] 
+    email_subject = data.get('email_subject', "Hello Cedric Jouan") 
+    email_to = data.get('email_to', "Cedric Jouan ") 
+    resp = requests.post( 
+        "https://api.mailgun.net/v3/sandbox87573be681cf489f90506a55814df346.mailgun.org/messages", 
+        auth=("api", MAILGUN_API_KEY), 
+        data={"from": "Mailgun Sandbox ", "to": email_to, "subject": email_subject, "text": email_message}) 
+    if resp.status_code == 200: 
+        logging.info(f"{email_message} succesffuly sent to {email_to}") 
+        return jsonify({'response': 'succes'}), 200 
+    else : 
+        return jsonify({'error': 'Bad request'}), 400
 
 @app.route('/assign_id', methods=['POST'])
 def assign_id():
