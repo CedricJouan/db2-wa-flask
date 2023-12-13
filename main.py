@@ -49,27 +49,30 @@ def query_data(customer_id):
 def get_db_ids():
     global db2_connection
     query = f"""
-    SELECT USER_ID FROM "CUSTOMER"."CUSTOMER_DATA"
+    SELECT NAME, USER_ID FROM "CUSTOMER"."CUSTOMER_DATA"
     """
     try :
         result = pd.read_sql_query(query, con=db2_connection)
-        result = list(result['USER_ID'])
+        result = result.set_index('NAME').to_dict()['USER_ID']
     except Exception as e:
         logging.error("Failed to call the model", str(e))
         traceback.print_exc()
         result = None
     return result
 
-def update_index(wa_user_id):
+def update_index(wa_user_id, persona_name):
     global user_index
     logging.info(f"updating index with {wa_user_id}")
-    existing = set(user_index.keys())
-    if wa_user_id in existing:
-        logging.info(f"{wa_user_id} already assigned")
-        return 'pass'
+    # existing = set(user_index.keys())
+    # if wa_user_id in existing:
+    #     logging.info(f"{wa_user_id} already assigned")
+    #     return 'pass'
     db_ids = get_db_ids()
-    if isinstance(db_ids, list):
-        new_id = random.sample(db_ids ,1)[0]
+    if isinstance(db_ids, dict):
+        if persona_name is not None:
+            new_id = db_ids[persona_name]
+        else:
+            new_id = random.sample(list(db_ids.values()), 1)[0]
         logging.info(f"assigning {new_id} to {wa_user_id}")
         user_index[wa_user_id]={"user_uid":new_id}
         with open(ui2name_index, 'w') as index_file:
@@ -84,24 +87,33 @@ def send_email():
     logging.info("send_email") 
     data = request.get_json(force=True) 
     email_message = data['email_message'] 
-    email_subject = data.get('email_subject', "Hello Cedric Jouan") 
-    email_to = data.get('email_to', "Cedric Jouan ") 
-    resp = requests.post( 
-        "https://api.mailgun.net/v3/sandbox87573be681cf489f90506a55814df346.mailgun.org/messages", 
-        auth=("api", MAILGUN_API_KEY), 
-        data={"from": "Mailgun Sandbox ", "to": email_to, "subject": email_subject, "text": email_message}) 
-    if resp.status_code == 200: 
-        logging.info(f"{email_message} succesffuly sent to {email_to}") 
-        return jsonify({'response': 'succes'}), 200 
-    else : 
-        return jsonify({'error': 'Bad request'}), 400
+    email_subject = data['email_subject']
+    email_to = data['email_to']
+    mailgun_endpoint = data['mailgun_endpoint'] # "https://api.mailgun.net/v3/sandbox87573be681cf489f90506a55814df346.mailgun.org/messages"
+    mailgun_address = data['mailgun_address'] # "Mailgun Sandbox postmaster@sandbox87573be681cf489f90506a55814df346.mailgun.org>"
+    if MAILGUN_API_KEY != "":
+        resp = requests.post( 
+            mailgun_endpoint, 
+            auth=("api", MAILGUN_API_KEY), 
+            data={"from": mailgun_address, 
+                "to": email_to, 
+                "subject": email_subject, 
+                "text": email_message}) 
+        if resp.status_code == 200: 
+            logging.info(f"{email_message} succesffuly sent to {email_to}") 
+            return jsonify({'response': 'succes'}), 200 
+        else : 
+            return jsonify({'error': 'Bad request'}), 400
+    else:
+       return jsonify({'error': 'No API Key provided for MAILGUN'}), 400
 
 @app.route('/assign_id', methods=['POST'])
 def assign_id():
     logging.info("assign_id")
     data = request.get_json(force=True)
     wa_user_id = data['user_id']
-    assigned_id = update_index(wa_user_id)
+    persona_name = data.get('persona_name', None)
+    assigned_id = update_index(wa_user_id, persona_name)
     if isinstance(assigned_id, str):
         logging.info(f"{wa_user_id} succesffuly assigned to {assigned_id}")
         return jsonify({'response': 'succes'}), 200
@@ -134,12 +146,13 @@ def get_user_data():
         return jsonify({'error': 'Bad request'}), 400
 
 if __name__ == '__main__':
-    logging.info("STARTING THE APP")
+    logging.info("STARTING MAIN")
     logging.info("get user index")
     with open(ui2name_index, 'r') as file:
         user_index = json.load(file)
     logging.info("Connect to db2")
     db2_connection = make_db2_connection()
+    logging.info("STARTING THE APP")
     app.run(
         host="0.0.0.0",
         port=8080,
